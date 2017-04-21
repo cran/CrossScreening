@@ -1,0 +1,557 @@
+\documentclass[11pt]{article}
+
+% \VignetteIndexEntry{CrossScreening Vignette}
+% \VignetteEngine{knitr::knitr}
+
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage{amsmath}
+% \usepackage[backend=bibtex, sorting=none]{biblatex}
+\usepackage[authoryear]{natbib}
+\usepackage[unicode=true,pdfusetitle,
+bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+{hyperref}
+\hypersetup{
+  pdfstartview={XYZ null null 1}}
+\usepackage{authblk}
+\usepackage{cleveref}
+\renewcommand{\baselinestretch}{1.2}
+
+\begin{filecontents*}{ref.bib}
+  @article{young2011deming,
+    title={Deming, data and observational studies},
+    author={Young, S Stanley and Karr, Alan},
+    journal={Significance},
+    volume={8},
+    number={3},
+    pages={116--120},
+    year={2011},
+    publisher={Wiley}
+  }
+  @incollection{pollard2005multiple,
+    title = {Multiple Testing Procedures: the multtest Package and Applications to Genomics},
+    author = {Pollard, K S and Dudoit S and van der Laan M. J.},
+    booktitle = {Bioinformatics and Computational Biology Solutions Using R and Bioconductor},
+    year = {2005},
+    pages = {249--271},
+    publisher = {Springer}
+  }
+  @manual{r2017,
+    title = {R: A Language and Environment for Statistical Computing},
+    author = {{R Core Team}},
+    organization = {R Foundation for Statistical Computing},
+    address = {Vienna, Austria},
+    year = {2017},
+    url = {https://www.R-project.org/},
+  }
+  @manual{keele2014rbounds,
+    title = {rbounds: Perform Rosenbaum bounds sensitivity tests for matched and unmatched data},
+    author = {Luke J Keele},
+    year = {2014},
+    note = {R package version 2.1},
+    url = {https://CRAN.R-project.org/package=rbounds},
+  }
+  @article{rosenbaum2015two,
+    title={Two R packages for sensitivity analysis in observational studies},
+    author={Rosenbaum, Paul R},
+    journal={Observational Studies},
+    volume={1},
+    pages={1--17},
+    year={2015}
+  }
+  @article{heller2009split,
+    title={Split samples and design sensitivity in observational studies},
+    author={Heller, Ruth and Rosenbaum, Paul R and Small, Dylan S},
+    journal={Journal of the American Statistical Association},
+    volume={104},
+    number={487},
+    pages={1090--1101},
+    year={2009},
+    publisher={Taylor \& Francis}
+  }
+  @article{zhao2017cross,
+    title={Cross-screening in observational studies that test many hypotheses},
+    author={Zhao, Qingyuan and Small, Dylan S and Rosenbaum, Paul R},
+    journal={arXiv preprint arXiv:1703.02078},
+    year={2017}
+  }
+  @article{zhao2017sensitivity,
+    title={On sensitivity value of pair-matched observational studies},
+    author={Zhao, Qingyuan},
+    journal={arXiv preprint arXiv:1702.03442},
+    year={2017}
+  }
+  @article{rubin1974estimating,
+    added-at = {2009-10-28T04:42:52.000+0100},
+    author = {Rubin, Donald B},
+    journal = {Journal of Educational Psychology},
+    number = 5,
+    pages = {688--701},
+    title = {Estimating causal effects of treatments in randomized and nonrandomized studies},
+    volume = 66,
+    year = 1974
+  }
+  @article{morton1982lead,
+    title={Lead absorption in children of employees in a lead-related industry},
+    author={Morton, David E and Saah, Alfred J and Silberg, Stanley L and Owens, Willis L and ROBERTS, MARK A and Saah, Marylou D},
+    journal={American Journal of Epidemiology},
+    volume={115},
+    number={4},
+    pages={549--555},
+    year={1982},
+    publisher={Oxford Univ Press}
+  }
+  @article{deng2005investigating,
+    title={Investigating genetic damage in workers occupationally exposed to methotrexate using three genetic end-points},
+    author={Deng, Hongping and Zhang, Meibian and He, Jiliang and Wu, Wei and Jin, Lifen and Zheng, Wei and Lou, Jianlin and Wang, Baohong},
+    journal={Mutagenesis},
+    volume={20},
+    number={5},
+    pages={351--357},
+    year={2005},
+    publisher={Oxford Univ Press}
+  }
+  @article{rosenbaum2011new,
+    title={A New u-Statistic with Superior Design Sensitivity in Matched Observational Studies},
+    author={Rosenbaum, Paul R},
+    journal={Biometrics},
+    volume={67},
+    number={3},
+    pages={1017--1027},
+    year={2011},
+    publisher={Wiley Online Library}
+  }
+  @book{rosenbaum2002observational,
+    title={Observational Studies},
+    author={Rosenbaum, Paul R},
+    year={2002},
+    publisher={Springer}
+  }
+  @article{vawter2004,
+    title={Gender-specific gene expression in post-mortem human brain: localization to sex chromosomes},
+    author={Vawter, Marquis P and Evans, Simon and Choudary, Prabhakara and Tomita, Hiroaki and Meador-Woodruff, Jim and Molnar, Margherita and Li, Jun and Lopez, Juan F and Myers, Rick and Cox, David and others},
+    journal={Neuropsychopharmacology},
+    volume={29},
+    number={2},
+    pages={373-384},
+    year={2004},
+    publisher={NIH Public Access}
+  }
+  @article{gagnon2012,
+    title={Using control genes to correct for unwanted variation in microarray data},
+    author={Gagnon-Bartsch, Johann A and Speed, Terence P},
+    journal={Biostatistics},
+    volume={13},
+    number={3},
+    pages={539--552},
+    year={2012},
+    publisher={Biometrika Trust}
+  }
+  @article{wang2016confounder,
+    title = {Confounder adjustment in multiple hypothesis testing},
+    author = {Wang, Jingshu and Zhao, Qingyuan and Hastie, Trevor and Owen, Art B.},
+    journal = {to appear in Annals of Statistics},
+    year = {2016}
+  }
+  @article{wiens2003fixed,
+    title={A fixed sequence Bonferroni procedure for testing multiple endpoints},
+    author={Wiens, Brian L},
+    journal={Pharmaceutical Statistics},
+    volume={2},
+    number={3},
+    pages={211--215},
+    year={2003},
+    publisher={Wiley Online Library}
+  }
+  @article{burman2009recycling,
+  title={A recycling framework for the construction of Bonferroni-based multiple tests},
+  author={Burman, C-F and Sonesson, C and Guilbaud, O},
+  journal={Statistics in Medicine},
+  volume={28},
+  number={5},
+  pages={739--761},
+  year={2009},
+  publisher={Wiley Online Library}
+}
+\end{filecontents*}
+
+\begin{document}
+
+<<setup, include=FALSE, echo=FALSE>>=
+library(knitr)
+# set global chunk options
+opts_chunk$set(fig.path='figure/CrossScreening-', fig.align='center', fig.show='hold', par=TRUE)
+options(formatR.arrow=TRUE, width = 80, digits = 4)
+a4width<- 8.3
+a4height<- 11.7
+Sys.setenv(RSTUDIO_PDFLATEX = "/Library/TeX/texbin/latexmk")
+@
+
+\title{Multiple Hypotheses Testing in Pair-Matched Observational Studies: The \texttt{R} package \texttt{CrossScreening}}
+
+\author{Qingyuan Zhao}
+\affil{Department of Statistics, The Wharton School, University of Pennsylvania \\ qyzhao@wharton.upenn.edu}
+
+\maketitle
+
+\begin{abstract}
+  This article describes the \texttt{R} package
+  \texttt{CrossScreening} that provides useful functionality for multiple
+  hypotheses testing in pair-matched observational studies, including
+  performing sensitivity analyses with multiple signed score test
+  (\texttt{sen} function), computing sensitivity value
+  (\texttt{sen.value} function), and use planning sample to screen
+  hypotheses to gain power (\texttt{cross.screen} function). These
+  functions are demonstrated using four real
+  datasets by reproducing results of several previous papers.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+In an observational study that tests many causal hypotheses, to be credible one must demonstrate that its conclusions are neither artifacts of multiple testing nor of small biases from nonrandom treatment assignment. Indeed, \citet{young2011deming} identified two main difficulties with observational studies: multiple testing/multiple modeling and bias due to unmeasured confounder. Existing \texttt{R} packages for multiple testing, such as the \texttt{p.adjust} function in the \texttt{stats} package \citep{r2017} and the resampling based tests implemented in \texttt{multtest} package, only correct for the error due to simultaneous testing and ignore the systematic error due to confounding bias. Other \texttt{R} packages for sensitivity analysis such as \texttt{rbounds} \citep{keele2014rbounds} and \texttt{sensitivitymw} \citep{rosenbaum2015two} consider how uncontrolled confounder may change the qualitative conclusion of a single causal hypothesis.
+
+This article describes the new R package \texttt{CrossScreening} that provide useful functions to screen and test causal hypotheses. When hundreds or thousands of hypotheses are tested at the same time, the cross-screening method implemented in \texttt{cross.screen} can substantially improve power over directly applying multiple testing procedures on the $p$-values generated from \texttt{rbounds} or \texttt{sensitivitymw}. Intuitively, this is due to the conservativeness of the $p$-value of a sensitivity analysis when the null hypothesis is correct. To avoid over-correcting for the conservative $p$-values, \citet{heller2009split} proposed to use a subsample of the data to screen the hypotheses before using rest of the data for sensitivity analysis. \citet{zhao2017cross} further proposed to use both subsamples to screen the hypotheses and perform sensitivity analyses. The cross-screening procedure in \citet{zhao2017cross} is usually more powerful and robust than the sample splitting procedure in \citet{heller2009split}, and both procedures are implemented in this package.
+
+To screen many bias-prone hypotheses, a useful function is
+\texttt{sen.value} in the package. The \texttt{sen.value} function
+returns the "sensitivity value"---the magnitude of departure from a
+randomized experiment needed to change the qualitative conclusions, a
+concept used in many existing observational studies and formalized in \citet{zhao2017sensitivity}. The sensitivity value speaks to the assertion "it might be bias" in an observational study in much the same way as the $p$-value speaks to the assertion "it might be bad luck" in a randomized trial \citep{rosenbaum2015two}. Just as the $p$-value in a randomized experiment summarizes the amount of bad luck needed for the association between treatment and outcome to be non-causal, the sensitivity value in an observational study summarizes the amount of bias needed for that association to be non-causal. Therefore, it is quite natural to use sensitivity values to screen hypotheses in an observational study.
+
+The rest of this article is organized as follows. \Cref{sec:obs-study}
+introduces some notations for a pair-matched observational study and describes four
+datasets that will be used as examples in this article. \Cref{sec:sen}
+outlines sensitivity analysis of observational studies and function
+\texttt{sen} in the package. \Cref{sec:sen-value} describes using
+sensitivity value to screen hypotheses and the function
+\texttt{sen.value} in the package. \Cref{sec:cross-screen} describes
+single-screening \citep{heller2009split} and cross-screening
+\citep{zhao2017cross} and the corresponding function
+\texttt{cross.screen}. \Cref{sec:discussion} concludes the article
+with a brief discussion.
+
+\section{Pair-matched observational studies}
+\label{sec:obs-study}
+
+We first describe the basic setting of a pair-matched observational study. There are $I$ independent matched pairs, $i=1,\dotsc,I$ and each pair has two subjects, $j=1,2$, one treated, denoted by $Z_{ij} = 1$, and one control, denoted by $Z_{ij} = 0$. Pairs are matched for observed covariates, but the investigator may be concerned that matching failed to control some unmeasured covariates $u_{ij}$. Let $r_{Tij}$ be the potential outcome of the $j$-th subject in the $i$-the pair if $ij$ receives treatment. Similarly, $r_{Cij}$ is the potential outcome if $ij$ receives control. The potential outcomes $r_{Tij}$ and $r_{Cij}$ can be a vector if multiple outcomes are observed. The observed outcome is $R_{ij} = Z_{ij} r_{Tij} + (1 - Z_{ij}) r_{Cij}$ and the individual treatment effect $r_{Tij} - r_{Cij}$ is not observed for any subject \citep{rubin1974estimating}.  Let $D_i$ be the treatment-minus-control difference $D_i = (Z_{i1} - Z_{i2})(R_{i1} - R_{i2})$ for the $i$-the pair.
+% Let $\mathcal{F} = \{(r_{Tij},r_{Cij},x_{ij},u_{ij}),~i=1,\dots,I,~j=1,2 \}$ and
+% $\mathcal{Z}$ be the event that $\{Z_{i1} + Z_{i2} =
+% 1,~i=1,\dotsc,I\}$.
+
+The \texttt{CrossScreening} package includes three datasets of observational studies:
+\begin{description}
+\item [lead] \citet{morton1982lead} compared the blood lead levels of 33 children whose father worked in a factory that used lead in manufacturing batteries to 33 control children of the same age from the same neighborhood.
+\item [methotrexate] \citet{deng2005investigating} compared the genetic damage of 21 workers from a plant producing methotrexate to 21 controls matched according to age, gender and smoking. Genetic damage of the workers are studied using four assays (four outcomes).
+\item [nhanes.fish] Using the 2013--2014 National Health and Nutrition Examination Survey (NHANES), \citet{zhao2017cross} compared 46 laboratory outcomes of 234 adults with high fish consumption (more than 12 servings of fish or shellfish in the previous month) with 234 adults with low fish consumption (0 or 1 servings of fish).
+\item [gender] In a microarray experiment, \citet{vawter2004} investigates genes differentially expressed in human brain with respect to gender. Using their dataset, \citet{zhao2017sensitivity} obtained $41$ matched pairs of males and females by the laboratory and microarray platform that analyzed the sample. There are in total 12,600 genes in this dataset.
+\end{description}
+
+The first three datasets can be load into R by
+<<load>>=
+library(CrossScreening)
+data(lead, methotrexate, nhanes.fish, nhanes.fish.match)
+@
+
+The next code chunk obtains the treat-minus-control differences (a matrix for \texttt{methotrexate} and \texttt{nhanes.fish}). Note that function \texttt{nhanes.log2diff} in the package computes the $\log_2$ differences of laboratory variables in the \texttt{nhanes.fish} dataset.
+<<difference>>==
+d.lead <- lead$exposed[-21] - lead$control[-21] # the 21st control outcome is NA
+d.methotrexate <- methotrexate[, 1:4] - methotrexate[, 6:9]
+d.nhanes <- nhanes.log2diff()
+@
+
+<<include=FALSE>>==
+## There is a machine precision issue (for example, 0.14 - 0.11 == 0.03 is FALSE)
+## To exactly reproduce the result in Rosenbaum (2011), we round the values.
+d.methotrexate$wmtm <- round(d.methotrexate$wmtm, 3)
+@
+
+The \texttt{gender} dataset is too large to be put inside a \texttt{R}
+package. It can be obtained by
+<<read gender, cache=FALSE, tidy=TRUE>>==
+url <- "https://raw.githubusercontent.com/qingyuanzhao/CrossScreening/master/"
+d.gender <- read.csv(paste0(url, "data/d.gender.csv"))
+@
+
+
+\section{Sensitivity analysis}
+\label{sec:sen}
+
+The sharp null hypothesis of no treatment effect assumes that $H_0:r_{Tij} = r_{Cij},~\forall i,j$. If $H_0$ is true and the treatments are randomly assigned, then conditioning on the potential outcomes and observed and unobserved covariates, $D_i = (Z_{i1} - Z_{i2})(r_{Ci1} - r_{Ci2})$ attaches equal probabilities to $\pm |r_{Ci1} - r_{Ci2}|$. When there is no concern of bias due to unmeasured confounders, a randomization test can be used to test $H_0$. One popular choice is Wilcoxon's signed rank test which uses the ranks of the absolute differences $|D_i|$, $i=1,\dotsc,n$. This can be done using the \texttt{sen} function by setting the sensitivity parameter $\Gamma$ to $1$.
+<<>>==
+sen(d.lead, gamma = 1)$p.value
+@
+It is easy to check that the $p$-value computed by \texttt{sen} is very close to the \texttt{wilcox.test} function in the \texttt{stats} package. They are not exactly equal because \texttt{d.lead} has tied values and also \texttt{sen} always uses a normal approximation while \texttt{wilcox.test} computes an exact $p$-value when sample size is less than $50$.
+<<warning = FALSE>>==
+wilcox.test(d.lead, alternative = "greater")$p.value
+@
+
+In a sensitivity analysis, the user specifies the sensitivity parameter $\Gamma \ge 1$, the upper bound of the odds ratio of treatment for two matched people. $\Gamma = 1$ means the odds ratio can only be $1$, so the matched observational study mimics a randomized experiment. The larger the parameter $\Gamma$, the more bias we allow in the study. When $\Gamma > 1$, $p$-value is no longer a single value, but rather an interval of possible $p$-values. Typically the largest possible (worst case) $p$-value is reported. For more technical detail about sensitivity analysis, we refer the reader to \citet[Chapter 4]{rosenbaum2002observational}.
+
+To run a sensitivity analysis, simply call \texttt{sen} with a vector of sensitivity parameters $\Gamma$:
+<<>>==
+gamma <- c(1, 4, 4.5, 5, 5.5, 5.8)
+round(sen(d.lead, gamma = gamma)$p.value, 3)
+@
+This reproduces the first column of Table 2(a) in \citet{rosenbaum2011new}. Notice that the \texttt{p.value} field in the returned list of \texttt{sen} contains the upper bound(s) of one-sided $p$-values (default \texttt{alternative} is greater than $0$). The field \texttt{p.value2} contains the upper bound(s) of two-sided $p$-values.
+
+\citet{rosenbaum2011new} proposed a new class of signed score tests for sensitivity analysis in observational studies. By choosing an appropriate non-linear transform (indexed by three numbers, $(m,\underline{m},\overline{m})$) to the ranks, the tests are usually less sensitive to unmeasured bias than Wilcoxon's signed rank test. The \texttt{sen} function implements this class of tests and supports multiple test statistics by inputing a matrix \texttt{mm} with $3$ rows. (By default, \texttt{mm = NULL} is Wilcoxon's test.) The next code chunk reproduces Table 2(b) in \citet{rosenbaum2011new}.
+<<>>==
+mm <- matrix(c(2, 2, 2, 5, 4, 5, 8, 7, 8, 8, 6, 8, 8, 5, 8, 8, 6, 7), nrow = 3)
+gamma <- c(1, 1.3, 1.4, 2, 2.5)
+round(sen(d.methotrexate$wmtm, mm, gamma, score.method = "exact")$p.value, 4)
+@
+
+Additionally, under the assumption that the treatment effect is an
+additive constant $r_{Tij} - r_{Cij} \equiv \tau$, one can obtain
+confidence interval of the treatment effect $\tau$ allowing for a bias
+of $\Gamma$ in treatment assignment by inverting sensitivity
+analysis. The confidence interval is implemented in the
+\texttt{sen.ci} function which returns two intervals,
+\texttt{point.estimate} and \texttt{ci}. Since we allow bias in
+treatment assignment up to $\Gamma$, the Hodges-Lehmann point
+estimate of $\tau$ is indeed a range of values when $\Gamma > 1$. We refer the reader to \citet[Section 5]{rosenbaum2011new}
+for more detail. Next we reproduce the results for the lead example in \citet[Section 5]{rosenbaum2011new}.
+<<CI>>==
+sen.ci(d.lead, gamma = c(1, 2), alpha.up = 0, alpha.low = 0.05)
+@
+By default, Wilcoxon's test is used. At $\Gamma = 2$, the one-sided
+confidence interval of $\tau$ is $[5.5, \inf)$ and the range of point estimate
+is $[10.5, 19.5]$.
+
+\section{Using the sensitivity value to screen hypotheses}
+\label{sec:sen-value}
+
+Since sensitivity analysis gives an upper bound of possible $p$-values when $\Gamma > 1$, the null hypotheses will typically have very conservative $p$-value upper bounds (stochastically larger than the uniform distribution on $[0,1]$). In fact, in absence of bias, it is extremely unlikely that random chance alone can create an association insensitive to moderate amount of bias. To see this, we run two-sided sensitivity analysis using Wilcoxon's test on the first $8$ outcomes in the NHANES fish dataset:
+<<>>==
+gamma <- c(1, 1.25, 1.5)
+round(apply(d.nhanes[, 1:8], 2, function(d) sen(d, gamma = gamma)$p.value2), 3)
+@
+The $p$-value bounds for $\Gamma = 1.25$ and $1.5$ quickly become very close to $1$. In contrast, a true causal effect may fend off a large amount of bias. In the NHANES fish dataset, \texttt{o.LBXTHG} is the total blood mercury of the surveyee and it remains significant
+<<>>=
+mm <- matrix(c(2, 2, 2, 8, 5, 8), nrow = 3)
+sen(d.nhanes$o.LBXTHG, mm, gamma = c(1, 5, 11, 14))$p.value2
+@
+The $(2,2,2)$ test closely resembles Wilcoxon's test and is more sensitive to bias than the $(8,5,8)$ test.
+
+Based on the observation above, \citet{heller2009split} proposed a sample splitting method that uses part of the data to screen the hypotheses and uses the other part for sensitivity analysis. What is a reasonable way to screen out the hypotheses that are sensitive to a small amount of bias? One possibility is to keep the hypotheses whose $p$-value upper bound at some $\Gamma$ is small. A more natural measure of the "sensitivity" of a hypothesis, is the sensitivity value---a concept formalized in \citet{zhao2017sensitivity}. Briefly speaking, sensitivity value is the critical parameter $\Gamma$ where the $p$-value upper bound just becomes insignificant. For example, if we zoom in to $13.6 \le \Gamma \ge 14$ in the fish-mercury example, sensitivity analysis outputs
+<<>>==
+sen(d.nhanes$o.LBXTHG, gamma = seq(13.6, 14, 0.05))$p.value2
+@
+If the significance level is $\alpha = 0.05$, the sensitivity value in this case is between $13.8$ and $13.85$. This can be computed via the \texttt{sen.value} function by setting \texttt{alpha} to $0.05/2$ (divided by $2$ because \texttt{sen.value} is one-sided by nature):
+<<>>==
+kappa2gamma(sen.value(d.nhanes$o.LBXTHG, alpha = 0.05, alternative = "two.sided"))
+@
+The function \texttt{sen.value} outputs the sensitivity value in the $\kappa = \Gamma / (1 - \Gamma)$ scale, and \texttt{kappa2gamma} transforms the value to the familiar $\Gamma$ scale. Note that rather than searching over a range of $\Gamma$,\texttt{sen.value} directly computes the sensitivity value and is much faster than searching \citep{zhao2017sensitivity}. The function \texttt{sen.value} also supports matrix input of the differences and test statistics. For example,
+<<>>=
+kappa2gamma(sen.value(d.nhanes[, c(1:5, 18, 21, 23)],
+alpha = 0.05, mm = mm, alternative = "two.sided"))
+@
+When the sensitivity value $\Gamma^*$ is less than $1$, this means the usual hypothesis test at $\Gamma=1$ is not significant and $1/\Gamma^*$ is the critical value that the \emph{lower} bound of $p$-values becomes significant.
+
+We demonstrate the use of sensitivity value in screening hypotheses by reproducing the results in \citet[Section 4]{zhao2017sensitivity}. \citet{gagnon2012} and \citet{wang2016confounder} studied the \texttt{gender} microarray dataset and found that it is very likely that the associations between genes and gender have unmeasured confounding. Sensitivity values provide a brief summary of which associations are less sensitive to unmeasured bias.
+<<gamma star gender, cache=FALSE, tidy=TRUE>>==
+gamma.star <- kappa2gamma(sen.value(d.gender, alpha = 0.05, alternative = "two.sided"))
+@
+
+<<qq, fig.width=0.4*a4width, fig.height=0.4*a4width, fig.cap="Quantile-quantile plot of the sensitivity values in the gender dataset">>==
+library(ggplot2)
+ggplot() + aes(sample = gamma.star) + stat_qq() +
+xlab("Normal quantile") + ylab("Sensitivity value quantile")
+@
+
+\Cref{fig:qq} shows the quantile-quantile plot of the two-sided sensitivity values of the 12,600 genes using Wilcoxon's test. It is clear from the plot that two genes have large sensitivity values and thus are more robust to confounding bias.
+
+\section{Approximating the power of a sensitivity analysis}
+\label{sec:appr-power-sens}
+
+To facilitate the design of observational studies, The
+\texttt{power.sen} function in the package computes approximate power
+of a sensitivity analysis using asymptotic formulas in
+\citet{zhao2017sensitivity}. We assume the data are in favorable
+situation that random treatment assignment is satisfied after matching
+and there is a positive treatment effect.
+The function \texttt{power.sen} first estimates the
+large-sample mean and variance of the signed score statistics, then
+use the estimates to compute the power of a subsequent sensitivity
+analysis using a different dataset. Alternatively, the user can specify the large-sample mean and variance
+of the test statistic.
+
+For example, suppose we observe $100$ planning samples whose
+treatment-minus-control differences are distributed as
+$\mathrm{N}(0.3, 1)$. The following code gives the power of a
+subsequent sensitivity analysis using $200$ and $500$ samples at
+sensitivity level $\Gamma = 2$ and significance level $\alpha =
+0.05$. We also consider two test statistics, $(2, 2, 2)$ which closely approximates Wilcoxon's test and $(8, 5, 8)$.
+<<>>==
+d <- rnorm(100) + 0.3
+mm <- matrix(c(2, 2, 2, 8, 5, 8), nrow = 3)
+power.sen(d = d, mm = mm, I = 200, gamma = 2)
+power.sen(d = d, mm = mm, I = 500, gamma = 2)$power
+@
+
+\section{Using cross-screening to improve the power of multiple testing}
+\label{sec:cross-screen}
+
+Sample splitting was introduced by \citet{heller2009split} to reduce
+the number of hypotheses and gain power in sensitivity analysis. We
+shall first explain the single screening procedure in
+\citet{heller2009split} before moving to the cross-screening procedure
+in \citet{zhao2017cross}. Both procedures are implemented in the
+function \texttt{cross.screen} in the package.
+
+In single screening, the entire data are randomly
+split into two parts, the first part ($0 < \zeta < 1$ proportion of
+the sample) is used to screen the hypotheses and the second part ($1 -
+\zeta$ proportion of the sample) is used for sensitivity
+analysis. \citet{heller2009split} used the $p$-value upper bounds at fixed $\Gamma = 2$ to screen the hypotheses (implemented in
+\texttt{cross.screen.fg} by specifying \texttt{gamma.screen = 2}). The
+user can use the option \texttt{screen.method} to decide which
+hypotheses are kept. Option \texttt{``threshold''} means the
+hypotheses with $p$-value upper bounds less than \texttt{alpha.screen}
+are kept, and option \texttt{``least.sensitive''} means the
+\texttt{least.sensitive}-smallest $p$-value upper bounds are
+kept. As explained earlier, sensitivity value is
+a more natural metric of the hypotheses' sensitivity to unmeasured
+bias (implemented in \texttt{cross.screen} with the same
+options). After screening, a sensitivity analysis is then performed
+for each selected hypothesis as explained in \Cref{sec:sen}.
+
+Single-screening can sometimes discard the wrong hypotheses in
+the screening step. A closely related but more robust procedure is cross-screening, in which both splits
+are used for screening and testing. Since the role of the two parts
+are now the same, it is recommended to choose $\zeta =
+1/2$. Cross-screening rejects the union of the rejected hypotheses in
+both halves, but since a false positive can occur in both halves,
+hence a Bonferroni correction is needed to control the familywise
+error rate. See \citet{zhao2017cross} for more technical detail.
+
+We illustrate the usage of \texttt{cross.screen} using the
+\texttt{nhanes.fish} dataset (see also the example of
+\texttt{cross.screen.fg} which reproduces Table 1 in \citet{zhao2017cross}). First, randomly split the sample into two halves
+
+<<>>==
+set.seed(11)
+split <- sample(1:nrow(d.nhanes), nrow(d.nhanes) / 2, replace = FALSE)
+d1 <- d.nhanes[split, ]
+d2 <- d.nhanes[- split, ]
+@
+
+Then, run \texttt{cross.screen} with the desired options. In the
+returned list, field \texttt{p} is the adjusted $p$-value that can be
+directly used to control FWER. For example, if we reject all the
+hypotheses whose corresponding \texttt{p} are less than $\alpha$, then
+the FWER is controlled at level $\alpha$.
+
+<<>>==
+cross.screen(d1, d2, gamma = 9, gamma.screen = 1.25, mm = c(2, 2, 2),
+screen.method = "least.sensitive", least.sensitive = 3)$p
+@
+
+Therefore, the 18th (total blood mercury) and 23rd (methyl mercury)
+outcomes can be rejected at $\Gamma = 9$ and $\alpha = 0.05$.
+
+To use single screening, simply use an appropriate split (usually
+the screening portion $\zeta <1/2$) and use the \texttt{p1} field of
+the returned list of \texttt{cross.screen}. Notice that the
+\texttt{p1} field is not adjusted for multiple testing.
+<<>>==
+split <- sample(1:nrow(d.nhanes), nrow(d.nhanes) * 0.3, replace = FALSE)
+d1 <- d.nhanes[split, ]
+d2 <- d.nhanes[- split, ]
+p.single <- cross.screen(d1, d2, gamma = 9, gamma.screen = 1.25, mm = c(2, 2, 2),
+screen.method = "least.sensitive", least.sensitive = 3)$p1
+p.adjust(p.single, "bonferroni")
+@
+
+By default, \texttt{cross.screen} tests for the two-sided
+alternative (\texttt{two.sided = TRUE}) and uses the planning sample can also be
+used to adaptively select the alternative
+direction. \texttt{cross.screen} can also adaptively select test
+statistic using the planning sample if the input \texttt{mm} is a
+matrix (each column correspond to a signed score statistic). In the
+three examples, three candidate statistics are considered ($(8,5,8)$
+is robust against most alternative distributions, $(8,7,8)$ is more
+powerful for light-tailed distributions and $(8,6,7)$ is more
+powerful for heavy-tailed distributions, see \citet{rosenbaum2011new}).
+<<>>==
+mm <- matrix(c(8, 5, 8, 8, 7, 8, 8, 6, 7), nrow = 3)
+cross.screen(d1, d2, gamma = 9, gamma.screen = 1.25, mm = mm,
+screen.method = "least.sensitive", least.sensitive = 3)$p
+@
+
+In addition to screening out some hypotheses that are sensitive to
+bias, we can also use the planning step to order the hypotheses
+(\texttt{s1.order} and \texttt{s2.order} in the returned list of
+\texttt{cross.screen}). In the next example, we set \texttt{gamma =
+  1.5} and \texttt{screen.method = ``threshold''}.
+<<>>==
+output <- cross.screen(d1, d2, gamma = 1.5, gamma.screen = 1.25, mm = mm,
+screen.method = "threshold")
+attach(output)
+s1.order
+s2.order
+@
+
+Given the ordered hypotheses, we can use a sequential test that controls FWER. The
+\texttt{fallback.test} function implements the fallback procedure of
+\citet{wiens2003fixed} that spreads the significance equally into the
+first few hypotheses. Note that to control FWER at $\alpha$, the sequential tests
+should be performed at significance level $\alpha / 2$. In the above
+example, the rejected outcomes are the union of
+<<>>==
+s1.order[fallback.test(p1[s1.order], alpha = 0.05/2)]
+s2.order[fallback.test(p2[s2.order], alpha = 0.05/2)]
+@
+
+If we ignore the ordering and just use Bonferroni's correction, the
+rejected outcomes are
+<<>>==
+which(p <= 0.05)
+@
+
+In the above example, ordering the hypotheses helps to reject one more
+outcome at $\Gamma = 1.5$.
+
+<<include=FALSE>>==
+detach(output)
+@
+
+\section{Discussion}
+\label{sec:discussion}
+
+The \texttt{CrossScreening} package provides many useful \texttt{R}
+functions to test multiple hypotheses in a pair matched observational
+study. We have demonstrated the usage and options of these functions
+through reproducing the numerical results in some previous papers, including \citet{heller2009split,rosenbaum2011new,zhao2017sensitivity,zhao2017cross}.
+
+Cross-screening is a very flexible method and this package does not
+implement all the possible extensions. For instance, other sequential
+testing methods (e.g.\ the recycling tests in
+\citet{burman2009recycling}) can be used after the hypotheses are
+ordered. The Bonferroni adjusted $p$-values (\texttt{p} in the
+returned list of \texttt{cross.screen}) provide a quick test that
+controls FWER, but to gain more power we recommend the investigator to
+choose a sequential test based on her subject
+knowledge. The idea of cross-screening can also be used in problems
+that do not use sensitivity analysis. However, it is attractive only
+if there are dozens of tests and many of them are conservative.
+
+So far we have only used cross-screening with random splits of the
+data. In some problems, we may want to test the
+hypotheses for different subgroups defined by a binary covariate. In
+this case, we can call \texttt{cross.screen} with the appropriate
+\texttt{d1} and \texttt{d2}. We refer the reader to \citet[Section
+6]{zhao2017cross} for more discussion on nonrandom cross-screening.
+
+
+\bibliographystyle{plainnat}
+\bibliography{ref}
+
+\end{document}

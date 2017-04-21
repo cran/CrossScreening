@@ -111,8 +111,8 @@ table5 <- function(no.sims = 1) {
         o1 <- p.cross$s1.order
         o2 <- p.cross$s2.order
         ## Cross screening: Bonferroni
-        oo1 <- which(p.cross$s1.kappa > gamma.to.kappa(setting$gamma.screen))
-        oo2 <- which(p.cross$s2.kappa > gamma.to.kappa(setting$gamma.screen))
+        oo1 <- which(p.cross$s1.kappa > gamma2kappa(setting$gamma.screen))
+        oo2 <- which(p.cross$s2.kappa > gamma2kappa(setting$gamma.screen))
         n1 <- length(oo1)
         n2 <- length(oo2)
         if (n1 > 0) {

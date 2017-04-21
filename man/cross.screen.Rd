@@ -5,12 +5,14 @@
 \alias{cross.screen.fg}
 \title{Cross-screening}
 \usage{
-cross.screen(d1, d2, gamma = 1, mm = c(2, 2, 2), alpha.screen = 0.05,
-  gamma.screen = 0, two.sided = TRUE)
+cross.screen(d1, d2, gamma = 1, mm = c(2, 2, 2), screen.value = c("sen",
+  "p"), screen.method = c("threshold", "least.sensitive"),
+  alpha.screen = 0.05, gamma.screen = gamma, least.sensitive = 2,
+  two.sided = TRUE)
 
-cross.screen.fg(d1, d2, gamma = 1, screen.method = c("threshold",
-  "least_sensitive"), alpha.screen = 0.05, alpha.least.sensitive = 2,
-  gamma.screen = gamma, mm = c(2, 2, 2), two.sided = TRUE)
+cross.screen.fg(d1, d2, gamma = 1, mm = c(2, 2, 2),
+  screen.method = c("threshold", "least.sensitive"), alpha.screen = 0.05,
+  gamma.screen = gamma, least.sensitive = 2, two.sided = TRUE)
 }
 \arguments{
 \item{d1}{screen/test sample (treatment-minus-control differences), can be a matrix (rows are observations, columns are hypotheses)}
@@ -21,15 +23,17 @@ cross.screen.fg(d1, d2, gamma = 1, screen.method = c("threshold",
 
 \item{mm}{a vector of matrix. If matrix, adaptively choose statistic. NULL means Wilcoxon's signed rank statistic.}
 
+\item{screen.value}{either "sen" (using sensitivity value) or "p" (using p-value).}
+
+\item{screen.method}{either keep all hypotheses significant at \code{gamma.screen} (option "threshold") or keep the least sensitive hypotheses (option "least.sensitive").}
+
 \item{alpha.screen}{significance level used in screening.}
 
 \item{gamma.screen}{screening threshold, default is 0, meaning no screening is used.}
 
+\item{least.sensitive}{the number of least sensitive hypotheses to keep}
+
 \item{two.sided}{if TRUE, automatically select the sign to test; if FALSE, test the one-sided alternative that the center of \code{d} is positive.}
-
-\item{screen.method}{either keep all hypotheses significant at \code{gamma.screen} (option "threshold") or keep the least sensitive hypotheses (option "least_sensitive").}
-
-\item{alpha.least.sensitive}{the number of least sensitive hypotheses to keep}
 }
 \value{
 \code{cross.screen} returns a list
@@ -87,6 +91,7 @@ cross.screen(d1, d2,
 
 ## The following code generates Table 1 in the paper.
 
+require(CrossScreening)
 data(nhanes.fish)
 data(nhanes.fish.match)
 
@@ -110,10 +115,11 @@ d2 <- d[-split, ]
 mm <- matrix(c(2, 2, 2, 8, 5, 8), ncol = 2)
 data.frame(outcome = names(data)[outcomes],
            p.value =
-               cross.screen.fg(d1, d2,
-                               gamma = 9,
-                               screen.method = "least_sensitive",
-                               mm = mm)$p)
+               cross.screen(d1, d2,
+                            gamma = 9,
+                            screen.value = "p",
+                            screen.method = "least.sensitive",
+                            mm = mm)$p)
 
 
 }

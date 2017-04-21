@@ -4,32 +4,58 @@
 \alias{sen}
 \title{Sensivity analysis with signed score test}
 \usage{
-sen(y, mm = NULL, gamma = 1, tail = c("upper", "lower"))
+sen(d, mm = NULL, gamma = 1, alternative = c("greater", "less"),
+  approx.method = c("normal", "permutation"),
+  score.method = c("approximate", "exact"), tau = 0, num.perms = 10000)
 }
 \arguments{
-\item{y}{a vector of treatment-minus-control differences}
+\item{d}{a vector of treatment-minus-control differences}
 
-\item{mm}{a vector (m, munder, mover) that indicates the U-statistic. NULL means Wilcoxon's signed rank test.}
+\item{mm}{a vector (m, munder, mover) or a matrix, each column a vector (m, munder, mover) that indicates the U-statistic.s NULL means Wilcoxon's signed rank test.}
 
-\item{gamma}{sensitivity parameter >= 1.}
+\item{gamma}{a vector of sensitivity parameters (must be >= 1).}
 
-\item{tail}{report p-value corresponds to the maximum ("upper") or minimum ("lower") bound}
+\item{alternative}{report p-value corresponds to the maximum ("upper") or minimum ("lower") bound}
+
+\item{approx.method}{how to compute the $p$-value upper bound? either "normal" approximation or random "permutations".}
+
+\item{score.method}{either approximate score or exact score}
+
+\item{tau}{a scalar, null hypothesis is the additive effect is \code{tau} (default 0)}
+
+\item{num.perms}{number of Monte-Carlo simulations used to compute the sensivitiy value, if \code{approx.method} is "permutations".}
 }
 \value{
 A list
 \describe{
-\item{pval}{p-value}
-\item{pval2}{two sided p-value}
+\item{p.value}{p-values corresponding to each entry of \code{gamma}}
+\item{p.value2}{two sided p-values}
+\item{gamma.hat}{estimate of design sensitivity}
 \item{T}{test statistic}
-\item{E}{Mean of the test statistic under sensivity gamma}
-\item{V}{Variance of the test statistic under sensitivity gamma}
-\item{devc}{Effect size of T compared to E and V}
+\item{E}{Means of the test statistic under sensivity \code{gamma}}
+\item{V}{Variances of the test statistic under sensitivity \code{gamma}}
+\item{eff.size}{Effect size of T compared to E and V}
+\item{E.gamma1}{Expectation of T under null at Gamma = 1}
 }
 }
 \description{
-Sensivity analysis with signed score test
+This function implements Rosenbaum's sensitivity analysis for pair-matched observational study with general signed score test. It is faster and more flexible than the \code{psens} function in the package \code{rbounds}.
+}
+\examples{
+
+require(CrossScreening)
+data(lead)
+d.lead <- lead$exposed[-21] - lead$control[-21]
+sen(d.lead, gamma = c(1, 2, 3, 4, 5, 6))
+
 }
 \author{
 Paul Rosenbaum, Qingyuan Zhao
+}
+\references{
+\itemize{
+\item{Rosenbaum, Paul R. \emph{Observational Studies}. Springer New York, 2002.}
+\item{Rosenbaum, P. R. (2011). A New u-Statistic with Superior Design Sensitivity in Matched Observational Studies. \emph{Biometrics}, 67(3), 1017-1027.}
+}
 }
 

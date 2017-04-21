@@ -14,7 +14,7 @@ fallback.test(p, alpha = 0.05, spread = 1)
 \item{spread}{the way to spread \code{alpha}, either a vector of the same length as \code{p} or a single number to indicate equal spread in the first \code{spread} hypotheses.}
 }
 \value{
-the rejected hypotheses
+the rejected hypotheses (TRUE means reject, FALSE means accept)
 }
 \description{
 Fallback procedure for multiple testing
